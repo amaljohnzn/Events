@@ -30,12 +30,10 @@ app.use('/api/events', eventRoute);
 app.use('/api/tickets', ticketRoute);
 app.use('/api/payment', paymentRoute);
 
-const PORT = process.env.PORT || 3000;
-
 if (process.env.NODE_ENV === 'production') {
-    module.exports = app; // For Vercel
+    module.exports = app; // Export for Vercel serverless deployment
 } else {
-    app.listen(PORT, () => {
-        console.log(`Server listening on port ${PORT}`);
+    app.listen(process.env.PORT || 3000, () => {
+        console.log(`Server listening on port ${process.env.PORT || 3000}`);
     });
 }
