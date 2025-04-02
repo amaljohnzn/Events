@@ -28,7 +28,7 @@ app.use(cors({
 }));
 
 app.get('/',(req,res)=>{
-    res.send("welcome to my page")
+    res.send("welcome to my pages")
 })
 
 app.use('/api/user',userRoute)
