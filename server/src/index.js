@@ -19,9 +19,8 @@ connectDB()
 
 app.use(express.json())
 app.use(cookieparser())
-
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000", 
+    origin: [process.env.FRONTEND_URL, "https://events-pearl.vercel.app"], // Add Vercel frontend URL
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
