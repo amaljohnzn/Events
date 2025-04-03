@@ -20,12 +20,11 @@ connectDB()
 app.use(express.json())
 app.use(cookieparser())
 app.use(cors({
-    origin: [process.env.FRONTEND_URL, "https://events-pearl.vercel.app"], // Add Vercel frontend URL
+    origin: process.env.FRONTEND_URL || "http://localhost:3000", // Use frontend URL from .env
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
-
 app.get('/',(req,res)=>{
     res.send("welcome to my pages")
 })
