@@ -15,7 +15,7 @@ function Signup() {
     const formData = { name, email, password, role };
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/api/user/register`, // Use environment variable for API URL
+        `${API_BASE_URL}api/user/register`, // Use environment variable for API URL
         formData,
         {
           headers: {
