@@ -9,40 +9,41 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('');
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const userSignUp = async () => {
     const formData = { name, email, password, role };
     try {
       const response = await axios.post(
-        'http://localhost:4000/api/user/register', // Use HTTP for localhost
+        `${API_BASE_URL}/api/user/register`, // Use environment variable for API URL
         formData,
         {
           headers: {
             'Content-Type': 'application/json',
           },
         }
-      )
-      return response.data; // Return the server's response
+      );
+      return response.data;
     } catch (error) {
       console.error('Axios Error:', error);
-      throw error; // Propagate the error for further handling
+      throw error;
     }
   };
 
-  const navigate=useNavigate()
+  const navigate = useNavigate();
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Call userSignUp and handle response or errors
     userSignUp()
       .then((res) => {
         console.log('Response from server:', res);
         alert('Sign-up successful!');
-        navigate("/")
+        navigate("/");
       })
       .catch((err) => {
         console.error('Error during sign-up:', err);
         alert('Sign-up failed. Please try again.');
       });
-    console.log('Name:', name, 'Email:', email, 'Password:', password, 'Role:', role);
   };
 
   return (
