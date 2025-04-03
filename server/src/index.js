@@ -16,11 +16,8 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Properly configure CORS to handle multiple allowed origins
-const allowedOrigins = [
-    process.env.FRONTEND_URL, // Ensure this is correctly set in .env
-    "http://localhost:3000"
-];
+// ✅ Allow multiple origins dynamically
+const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:3000"];
 
 app.use(cors({
     origin: function (origin, callback) {
