@@ -10,12 +10,13 @@ function Signup() {
   const [role, setRole] = useState('');
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const navigate = useNavigate();
 
   const userSignUp = async () => {
     const formData = { name, email, password, role };
     try {
       const response = await axios.post(
-        `${API_BASE_URL}api/user/register`, // Use environment variable for API URL
+        `${API_BASE_URL}/api/user/register`, // ensure `/` between base and path
         formData,
         {
           headers: {
@@ -30,68 +31,75 @@ function Signup() {
     }
   };
 
-  const navigate = useNavigate();
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    userSignUp()
-      .then((res) => {
-        console.log('Response from server:', res);
-        alert('Sign-up successful!');
-        navigate("/");
-      })
-      .catch((err) => {
-        console.error('Error during sign-up:', err);
-        alert('Sign-up failed. Please try again.');
-      });
+    try {
+      const res = await userSignUp();
+      console.log('Response from server:', res);
+      alert('Sign-up successful!');
+      navigate('/');
+    } catch (err) {
+      console.error('Error during sign-up:', err);
+      const message = err.response?.data?.message || 'Sign-up failed. Please try again.';
+      alert(message);
+    }
   };
 
   return (
-    <Container>
-      <h2>Sign up</h2>
+    <Container className="mt-5">
+      <h2 className="mb-4">Sign up</h2>
       <Form onSubmit={handleSubmit}>
-        <Form.Group controlId="formName">
+        <Form.Group controlId="formName" className="mb-3">
           <Form.Label>Name</Form.Label>
           <Form.Control
             type="text"
             placeholder="Enter your name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            required
           />
         </Form.Group>
-        <Form.Group controlId="formBasicEmail">
+
+        <Form.Group controlId="formBasicEmail" className="mb-3">
           <Form.Label>Email address</Form.Label>
           <Form.Control
             type="email"
             placeholder="Enter email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </Form.Group>
-        <Form.Group controlId="formBasicPassword">
+
+        <Form.Group controlId="formBasicPassword" className="mb-3">
           <Form.Label>Password</Form.Label>
           <Form.Control
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
           />
         </Form.Group>
-        <Form.Group controlId="formRole">
+
+        <Form.Group controlId="formRole" className="mb-3">
           <Form.Label>Role</Form.Label>
-          <Form.Control
-            as="select"
+          <Form.Select
             value={role}
             onChange={(e) => setRole(e.target.value)}
+            required
           >
             <option value="">-- Select a Role --</option>
             <option value="admin">Admin</option>
             <option value="user">User</option>
-          </Form.Control>
+          </Form.Select>
         </Form.Group>
-        <Button variant="primary" type="submit">
+
+        <Button variant="primary" type="submit" className="w-100 mb-3">
           Sign up
         </Button>
+
         <div className="text-center">
           Already have an account? <Link to="/login">Log In</Link>
         </div>

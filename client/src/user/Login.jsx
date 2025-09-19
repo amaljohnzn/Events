@@ -8,74 +8,56 @@ import { saveUser } from '../redux/features/userSlice';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user'); // Default role is 'user'
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Function to handle login
   const userLogin = async () => {
     const formData = { email, password };
 
-    // Determine the login URL based on the selected role
-    const loginUrl =
-      role === 'admin'
-        ? 'http://localhost:4000/api/admin/login'
-        : 'http://localhost:4000/api/user/login';
+    // Single login endpoint
+    const loginUrl = 'http://localhost:4007/api/user/login'; // Update with your env variable if needed
 
     try {
       const response = await axios.post(loginUrl, formData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true, // if cookies/session are used
       });
-      const token = response.data.token; // Assuming the token is returned in the 'token' field of the response
-if (token) {
-  localStorage.setItem('token', token); // Save the token to localStorage
-}
 
-      console.log(response.data, 'Response from API');
+      const { token, user } = response.data;
 
-      // Check if the response contains `user` or `adminExist`
-      const userData = response.data.user || response.data.adminExist;
-
-      if (userData) {
-        // Store the token and user info in localStorage
-        localStorage.setItem('token', response.data.token); // Save the token
-        localStorage.setItem('user', JSON.stringify(userData)); // Save the user data
-
-        alert('Login successful!');
-        dispatch(saveUser(userData)); // Save user to Redux
-        console.log(userData, 'User data being saved to Redux');
-
-        // Redirect based on role
-        if (userData.role === 'admin') {
-          navigate('/admin-dashboard'); // Redirect to admin dashboard
-        } else if (userData.role === 'user') {
-          navigate('/user-dashboard'); // Redirect to user event page
-        }
-      } else {
-        console.error('Unexpected response structure:', response.data);
-        alert('Failed to process login. Please contact support.');
+      if (!user || !token) {
+        setError('Invalid login response from server.');
+        return;
       }
-    } catch (error) {
-      console.error('Axios Error:', error.response?.data || error.message);
-      setError('Login failed. Please check your credentials and try again.');
-      alert('Login failed. Please try again.');
+
+      // Save token and user info
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      dispatch(saveUser(user));
+
+      alert('Login successful!');
+
+      // Navigate based on role
+      if (user.role === 'admin') navigate('/admin-dashboard');
+      else navigate('/user-dashboard');
+
+    } catch (err) {
+      console.error('Login error:', err.response?.data || err.message);
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
     }
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     userLogin();
   };
 
   return (
-    <Container>
-      <h2>Login</h2>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group controlId="formBasicEmail">
+    <Container className="mt-4" style={{ maxWidth: '400px' }}>
+      <h2 className="text-center mb-4">Login</h2>
+      <Form onSubmit={handleSubmit} className="p-3 shadow-sm rounded bg-light">
+        <Form.Group className="mb-3" controlId="formBasicEmail">
           <Form.Label>Email address</Form.Label>
           <Form.Control
             type="email"
@@ -86,7 +68,7 @@ if (token) {
           />
         </Form.Group>
 
-        <Form.Group controlId="formBasicPassword">
+        <Form.Group className="mb-3" controlId="formBasicPassword">
           <Form.Label>Password</Form.Label>
           <Form.Control
             type="password"
@@ -97,24 +79,12 @@ if (token) {
           />
         </Form.Group>
 
-        <Form.Group controlId="formRole">
-          <Form.Label>Role</Form.Label>
-          <Form.Control
-            as="select"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            required
-          >
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </Form.Control>
-        </Form.Group>
-
         {error && <p style={{ color: 'red' }}>{error}</p>}
 
-        <Button variant="primary" type="submit">
+        <Button variant="primary" type="submit" className="w-100">
           Login
         </Button>
+
         <div className="text-center mt-3">
           Don't have an account? <Link to="/signup">Sign up</Link>
         </div>

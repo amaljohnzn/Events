@@ -1,62 +1,45 @@
 import React, { useEffect, useState } from "react";
-import { useParams,useNavigate } from "react-router-dom"; // To extract route parameters
-import { Container, Card, Spinner, Alert, Button } from "react-bootstrap"; // Bootstrap components
-import { useDispatch } from "react-redux"; // For Redux actions
-
-
+import { useParams, useNavigate } from "react-router-dom";
+import { Container, Card, Spinner, Alert, Button, Badge } from "react-bootstrap";
 
 const EventDetails = () => {
-  const { eventId } = useParams(); // Extract the "eventId" parameter from the route
-  const [event, setEvent] = useState(null); // State for event details
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
-  const dispatch = useDispatch(); // Initialize Redux dispatch
+  const { eventId } = useParams();
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Fetch event details when the component mounts
+  const API_BASE = import.meta.env.VITE_API_BASE_URL; // from .env
+
   useEffect(() => {
     const fetchEventDetails = async () => {
       try {
-        if (!eventId) {
-          throw new Error("Invalid event ID");
-        }
+        if (!eventId) throw new Error("Invalid event ID");
 
-        const response = await fetch(
-          `http://localhost:4000/api/events/eventdetails/${eventId}`
-        );
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} - ${response.statusText}`);
-        }
+        const response = await fetch(`${API_BASE}/api/events/eventdetails/${eventId}`);
+        if (!response.ok) throw new Error(`Error: ${response.status} - ${response.statusText}`);
 
         const data = await response.json();
-        setEvent(data.eventDetails); // Set the event details
-        setLoading(false); // Stop loading
+        setEvent(data.eventDetails);
       } catch (err) {
-        setError(err.message); // Set error state
-        setLoading(false); // Stop loading
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchEventDetails();
-  }, [eventId]);
+  }, [eventId, API_BASE]);
 
-  // Handle adding the event to the cart
-  // const addToCart = (event) => {
-  //   dispatch({ type: "ADD_TO_CART", payload: event }); // Dispatch Redux action
-  //   alert(`${event.title} has been added to the cart!`); // Notify user
-  // };
-
-  // Show a loading spinner while data is being fetched
   if (loading) {
     return (
-      <Container className="mt-4">
+      <Container className="mt-4 text-center">
         <Spinner animation="border" variant="primary" />
+        <p className="mt-2">Loading event details...</p>
       </Container>
     );
   }
 
-  // Show an error message if something goes wrong
   if (error) {
     return (
       <Container className="mt-4">
@@ -64,34 +47,44 @@ const EventDetails = () => {
       </Container>
     );
   }
- 
 
-  // Render the event details
   return (
-    <Container className="mt-4">
+    <Container className="mt-4 d-flex justify-content-center">
       {event && (
-        <Card style={{ width: "18rem" }}>
-          <Card.Img variant="top" src={event.image} alt={`${event.title} Image`} />
+        <Card className="shadow-sm" style={{ width: "22rem" }}>
+          <Card.Img
+            variant="top"
+            src={event.image}
+            alt={`${event.title} Image`}
+            style={{ height: "200px", objectFit: "cover" }}
+          />
           <Card.Body>
-            <Card.Title>{event.title}</Card.Title>
+            <Card.Title className="mb-3">{event.title}</Card.Title>
+            <Card.Text><strong>Description:</strong> {event.description}</Card.Text>
+            <Card.Text><strong>Date:</strong> {new Date(event.date).toLocaleDateString()}</Card.Text>
+            <Card.Text><strong>Time:</strong> {event.time}</Card.Text>
+            <Card.Text><strong>Venue:</strong> {event.venue}</Card.Text>
             <Card.Text>
-              <strong>Description:</strong> {event.description}
+              <strong>Ticket Price:</strong> ₹{event.ticketPrice}
             </Card.Text>
             <Card.Text>
-              <strong>Date:</strong> {new Date(event.date).toLocaleDateString()}
+              <strong>Available Slots:</strong>{" "}
+              {event.totalSlots > 0 ? (
+                <Badge bg="success">{event.totalSlots} Available</Badge>
+              ) : (
+                <Badge bg="danger">Sold Out</Badge>
+              )}
             </Card.Text>
-            <Card.Text>
-              <strong>Time:</strong> {event.time}
-            </Card.Text>
-            <Card.Text>
-              <strong>Venue:</strong> {event.venue}
-            </Card.Text>
-            {/* <Button variant="success" onClick={() => addToCart(event)}>
-              Add to Cart
-            </Button> */}
-            <Button onClick={() => navigate(`/api/tickets/event/${event._id}`)} variant="primary">
-              Ticket Info
-            </Button> 
+
+           <Button
+  onClick={() => navigate(`/booking/${event._id}`)} // ✅ navigate to booking page
+  variant="primary"
+  disabled={event.totalSlots === 0} // Disable if sold out
+  className="w-100"
+>
+  {event.totalSlots === 0 ? "Sold Out" : "Book Now"}
+</Button>
+
           </Card.Body>
         </Card>
       )}
@@ -100,7 +93,3 @@ const EventDetails = () => {
 };
 
 export default EventDetails;
-
-
-
-

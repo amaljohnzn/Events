@@ -1,73 +1,72 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Container, Table, Button, Spinner } from 'react-bootstrap';
+import { Container, Table, Button, Spinner, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 const EventList = () => {
-  const [events, setEvents] = useState([]);  // State to store events data
-  const [loading, setLoading] = useState(true);  // State to handle loading state
-  const [error, setError] = useState(null);  // State to handle error state
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    // Fetch events from API
-    axios.get('http://localhost:4000/api/events/eventlist')
-      .then(res => {
-        setEvents(res.data.eventList);  // Save events data in state
-        setLoading(false);  // Set loading to false after data is fetched
-      })
-      .catch(err => {
-        setError(err.message);  // Set error if there's any issue
-        setLoading(false);  // Set loading to false after error is handled
-      });
-  }, []);
+    const fetchEvents = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/api/events/eventlist`);
+        if (res.data?.eventList) {
+          setEvents(res.data.eventList);
+        } else {
+          setError('No events found.');
+        }
+      } catch (err) {
+        setError(err.response?.data?.message || err.message || 'Failed to fetch events.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, [API_BASE]);
 
-  // Delete event handler
-  const handleDelete = (eventId) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
-      axios.delete(`http://localhost:4000/api/events/delete/${eventId}`)
-        .then(() => {
-          // Remove the deleted event from state
-          setEvents(events.filter(event => event._id !== eventId));
-        })
-        .catch(err => {
-          setError('Error deleting event: ' + err.message);
-        });
+  const handleDelete = async (eventId) => {
+    if (!window.confirm('Are you sure you want to delete this event?')) return;
+
+    try {
+      await axios.delete(`${API_BASE}/api/events/delete/${eventId}`);
+      setEvents(events.filter((event) => event._id !== eventId));
+    } catch (err) {
+      setError('Error deleting event: ' + (err.response?.data?.message || err.message));
     }
   };
 
-  // Update event handler (navigate to the update page or open a modal)
   const handleUpdate = (eventId) => {
-     navigate(`/api/events/update/${eventId}`);
-      // navigate(`/EventUpdate/${eventId}`);
+    navigate(`/events/update/${eventId}`); // make sure your route matches
   };
 
-  // If loading, show a spinner
   if (loading) {
     return (
-      <Container className="mt-5">
-        <Spinner animation="border" role="status" variant="primary" />
+      <Container className="mt-5 text-center">
+        <Spinner animation="border" variant="primary" />
         <span className="ms-2">Loading events...</span>
       </Container>
     );
   }
 
-  // If error, show error message
   if (error) {
     return (
       <Container className="mt-5">
-        <h4 className="text-danger">Error: {error}</h4>
+        <Alert variant="danger">{error}</Alert>
       </Container>
     );
   }
 
   return (
     <Container className="mt-4">
-      <h1 className="mt-4 text-center border border-black rounded-pill bg-black text-white">
-        Eventmanagement
+      <h1 className="text-center mb-4 rounded-pill bg-black text-white p-2">
+        Event Management
       </h1>
 
-      <Table striped bordered hover responsive className="mt-4">
+      <Table striped bordered hover responsive>
         <thead>
           <tr>
             <th>Image</th>
@@ -76,11 +75,13 @@ const EventList = () => {
             <th>Date</th>
             <th>Time</th>
             <th>Venue</th>
+            <th>Ticket Price</th>
+            <th>Total Slots</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {Array.isArray(events) && events.length > 0 ? (
+          {events.length > 0 ? (
             events.map((event) => (
               <tr key={event._id}>
                 <td>
@@ -95,8 +96,9 @@ const EventList = () => {
                 <td>{new Date(event.date).toLocaleDateString()}</td>
                 <td>{event.time}</td>
                 <td>{event.venue}</td>
+                <td>{event.ticketPrice}</td>
+                <td>{event.totalSlots}</td>
                 <td>
-                  {/* Update Button */}
                   <Button
                     onClick={() => handleUpdate(event._id)}
                     variant="warning"
@@ -104,11 +106,7 @@ const EventList = () => {
                   >
                     Update
                   </Button>
-                  {/* Delete Button */}
-                  <Button
-                    onClick={() => handleDelete(event._id)}
-                    variant="danger"
-                  >
+                  <Button onClick={() => handleDelete(event._id)} variant="danger">
                     Delete
                   </Button>
                 </td>
@@ -116,7 +114,7 @@ const EventList = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="7" className="text-center">
+              <td colSpan="9" className="text-center">
                 No events available.
               </td>
             </tr>
@@ -128,4 +126,3 @@ const EventList = () => {
 };
 
 export default EventList;
-

@@ -5,60 +5,107 @@ const mongoose = require('mongoose');
 require('dotenv').config()
 const userDb = require('../Models/userModel')
 
+// Register
 exports.register = async (req, res) => {
     try {
+        let { name, email, password, role } = req.body;
 
-        const { name, email, password,role } = req.body
-        const userexists = await userDb.findOne({ email })
-        if (userexists)
-            return res.status(400).json({ message: "Email already exists" })
-        const hashedpassword = await bcrypt.hash(password, 10)
-        const newUser = new userDb({ name, email, password: hashedpassword ,role})
-        await newUser.save()
-        return res.status(200).json({ message: "user registered", data: newUser })
-    }
-    catch (error) {
-        return res.status(500).json({ message: "server error", error: error.message })
-    }
-}
-
-
- exports.login = async (req, res) => {
-  try {
-      console.log("Request body:", req.body);       
-  const { email, password } = req.body;
-
-        // Validate input fields
-        if (!email || !password || email.trim() === "" || password.trim() === "") {
-            return res.status(400).json({ message: "Email and password are required" });
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
         }
 
-         const normalizedEmail = email.toLowerCase();
-        const userExist = await userDb.findOne({ email: normalizedEmail });
-       console.log("User query result:", userExist);
+        email = email.toLowerCase();
 
-        if (!userExist) {
-          return res.status(404).json({ message: "User not found" });
+        const userExists = await userDb.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ message: "Email already exists" });
         }
 
-       const isMatch = await bcrypt.compare(password, userExist.password);
-       if (!isMatch) {
-            return res.status(401).json({ message: "Password incorrect" });
+
+        if (password.length < 6) {
+            return res.status(400).json({ message: "Password must be at least 6 characters long" });
         }
 
-        const token = jwt.sign(
-            { id: userExist._id, email: userExist.email, role: userExist.role },
-             process.env.JWT_secret,
-            { expiresIn: '7d' }
-       );
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new userDb({ name, email, password: hashedPassword, role });
+        await newUser.save();
 
-        res.cookie('token', token, { httpOnly: true });
-         return res.status(200).json({ message: "Logged in successfully", user: userExist });
+        const { password: _, ...safeUser } = newUser._doc;
+        return res.status(200).json({ message: "User registered", data: safeUser });
+
     } catch (error) {
-         return res.status(500).json({ message: "Server error", error: error.message });
+        return res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
+// Login
+exports.login = async (req, res) => {
+  try {
+    console.log("Login request body:", req.body);
+
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      console.log("Email or password missing");
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    const normalizedEmail = email.toLowerCase();
+    console.log("Normalized email:", normalizedEmail);
+
+    const userExist = await userDb.findOne({ email: normalizedEmail });
+    console.log("User found in DB:", userExist);
+
+    if (!userExist) {
+      console.log("User not found");
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(password, userExist.password);
+    console.log("Password match:", isMatch);
+
+    if (!isMatch) {
+      console.log("Password incorrect");
+      return res.status(401).json({ message: "Password incorrect" });
+    }
+
+    if (!process.env.JWT_secret) {
+      console.log("JWT secret missing");
+      throw new Error("JWT secret is not defined");
+    }
+
+    // Create JWT including role
+    const token = jwt.sign(
+      { id: userExist._id, email: userExist.email, role: userExist.role },
+      process.env.JWT_secret,
+      { expiresIn: '7d' }
+    );
+    console.log("JWT created:", token);
+
+    // Set cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+    console.log("Cookie set");
+
+    const { password: _, ...safeUser } = userExist._doc;
+
+    console.log("Returning response with user data:", safeUser);
+
+    return res.status(200).json({
+      message: "Logged in successfully",
+      user: safeUser,
+      token
+    });
+
+  } catch (error) {
+    console.error("Error during login:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 
 // Get all users

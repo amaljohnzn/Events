@@ -3,20 +3,18 @@ import { Container, Row, Col } from 'react-bootstrap';
 
 function Footer() {
   return (
-    // <footer className="bg-light text-black p-4">
-    // <footer style={{ backgroundColor: 'yellow' }} className="text-black p-4">
-    <footer style={footerStyle} className="text-black p-4">
+    <footer style={footerStyle}>
       <Container>
         <Row>
-          <Col md="6">
+          <Col md={6}>
             <h5>MyApp</h5>
             <p>&copy; 2025 MyApp. All rights reserved.</p>
           </Col>
-          <Col md="6" className="text-md-right">
-            <ul className="list-unstyled">
-              <li><a href="#home" className="text-black">Home</a></li>
-              <li><a href="#about" className="text-black">About</a></li>
-              <li><a href="#contact" className="text-black">Contact</a></li>
+          <Col md={6} className="text-md-end">
+            <ul className="list-unstyled mb-0">
+              <li><a href="#home" className="text-dark">Home</a></li>
+              <li><a href="#about" className="text-dark">About</a></li>
+              <li><a href="#contact" className="text-dark">Contact</a></li>
             </ul>
           </Col>
         </Row>
@@ -24,13 +22,13 @@ function Footer() {
     </footer>
   );
 }
+
 const footerStyle = {
-  backgroundColor: 'yellow',
-  position: 'fixed',
-  bottom: 0,
-  width: '100%',
-  left: 0,
-  zIndex: 1000,
+  backgroundColor: '#f8f9fa', // light grey
+  color: '#212529',            // dark text
+  padding: '20px 0',
+  borderTop: '1px solid #dee2e6',
+  textAlign: 'left',
 };
 
 export default Footer;

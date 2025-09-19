@@ -37,11 +37,11 @@ function UserDashboard() {
           <Card style={{ width: '18rem' }}>
             <Card.Img variant="top" src="holder.js/100px180" />
             <Card.Body>
-              <Card.Title>TICKETS LIST</Card.Title>
+              <Card.Title>MY BOOKINGS</Card.Title>
               <Card.Text>
                 {/* Add text here if needed */}
               </Card.Text>
-              <Button onClick={() => navigate('/tickets')} variant="primary">
+              <Button onClick={() => navigate('/mybookings')} variant="primary">
                 View Tickets
               </Button>
               {/* You can add additional buttons or content here */}

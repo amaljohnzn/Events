@@ -6,8 +6,7 @@ const connectDB = require('../src/config/db');
 const userRoute = require('../src/Routes/userroute');
 const adminRoute = require('../src/Routes/adminroute');
 const eventRoute = require('../src/Routes/eventRoute');
-const ticketRoute = require('../src/Routes/ticketroute');
-const paymentRoute = require('../src/Routes/paymentRoute');
+const bookings = require('../src/Routes/bookingRoutes');
 
 dotenv.config(); // Load environment variables
 const app = express();
@@ -39,11 +38,11 @@ app.get('/', (req, res) => {
 app.use('/api/user', userRoute);
 app.use('/api/admin', adminRoute);
 app.use('/api/events', eventRoute);
-app.use('/api/tickets', ticketRoute);
-app.use('/api/payment', paymentRoute);
+app.use('/api/bookings', bookings);
 
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
 });
+

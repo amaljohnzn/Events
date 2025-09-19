@@ -1,5 +1,5 @@
 const stripe = require('../config/stripe');
-const Payment = require('../Models/payment');
+const Payment = require('../Models/');
 
 const createPaymentIntent = async (amount, currency, userId) => {
   try {

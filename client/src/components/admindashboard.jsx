@@ -13,6 +13,7 @@ function AdminDashboard() {
 
       <h1>Welcome to Admin Dashboard!</h1>
       <Row>
+      
         
 
         {/* First Column */}
@@ -36,13 +37,11 @@ function AdminDashboard() {
 
         {/* Second Column */}
         <Col md={4}>
-        <Button onClick={() => navigate('/createticket')} variant="primary" >
-          Create Tickets
-        </Button>
+        
           <Card style={{ width: '18rem' }}>
             <Card.Img variant="top" src="holder.js/100px180" />
             <Card.Body>
-              <Card.Title>MANAGE TICKETS</Card.Title>
+              <Card.Title>TICKET LIST</Card.Title>
               <Card.Text>
                 {/* Add text here if needed */}
               </Card.Text>
@@ -55,9 +54,7 @@ function AdminDashboard() {
 
 
         <Col md={4}>
-        <Button onClick={() => navigate('/signup')} variant="primary" >
-          Create users
-        </Button>
+        
           <Card style={{ width: '18rem' }}>
             <Card.Img variant="top" src="holder.js/100px180" />
             <Card.Body>

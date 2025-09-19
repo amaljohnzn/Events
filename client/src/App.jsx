@@ -8,24 +8,19 @@ import Events from "./user/Events";
 import Login from "./user/Login";
 import Signup from "./user/Signup";
 import EventDetails from "./user/eventdetails";
-import Ticket from "./user/ticket";
-// import TicketPricesByEvent from "./user/ticketprice";
-import Tickets from "./user/ticketprice1";
 import AdminDashboard from "./components/admindashboard";
 import Userdahboard from "./components/userdahboard";
 import CreateEvent from "./components/createevents";
 import EventList from "./components/manageevents";
 import EventUpdate from "./components/updateevent";
-import CreateEventTicket from "./components/createticket";
-import PaymentForm from "./components/payment";
+import Payment from "./user/Payment";
 import UsersList from "./components/userslist";
 
-import Ticketlist from "./components/ticketlist";
-import  UpdateTicket  from "./components/ticketupdate";
+import MyBookings from "./user/MyBookings";
+import BookingPage from "./user/Bookings"
 
-
-
-
+import ReceiptPage from "./user/Recipet";
+import Ticket from "./components/TicketList"
 function App() {
   const router = createBrowserRouter([
     {
@@ -44,26 +39,13 @@ function App() {
           path: "events",
           element: <Events />,
         },
-        //  {
-        //    path: "event/:id", // Dynamic route for event details
-        //     element: <EventDetails />, // Render EventDetails component
-        //  },
-        // {
-        //   path: "event/:id", // Dynamic route for event details
-        //   element: <EventDetails />, // Render EventDetails component
-        // },
+       
         {
           path: "/api/events/eventdetails/:eventId",
           element: <EventDetails />
         },
-        // {
-        //   path:"/api/tickets/event/:eventId",
-        //   element: <TicketPricesByEvent />
-        // },
-        {
-          path: "/api/tickets/event/:eventId",
-          element: <Tickets />
-        },
+        
+       
 
 
 
@@ -83,13 +65,14 @@ function App() {
           path: "/eventlist",
           element: <EventList />
         },
+       {
+  path: "/events/update/:eventId",
+  element: <EventUpdate />
+},
+
         {
-          path: "/api/events/update/:eventId",
-          element: <EventUpdate />
-        },
-        {
-          path: "/createticket",
-          element: <CreateEventTicket />
+          path: "/ticketlist",
+          element: <Ticket />
         },
         {
           path: "/user-dashboard",
@@ -100,26 +83,29 @@ function App() {
           element: <Signup />,
         },
         {
-          path: "tickets",
-          element: <Ticket />,
+          path: "/mybookings",
+          element: <MyBookings />,
         },
+
+
         {
-          path: "/payment",
-          element: <PaymentForm />,
-        },
+  path: "payment/:bookingId",
+  element: <Payment />
+}
+,
         {
           path: "/userslist",
           element: < UsersList />,
         },
-        
         {
-          path: "/ticketlist",
-          element: <Ticketlist />
-        },
-        {
-          path: "/tickets/update/:ticketId",
-          element: < UpdateTicket />
-        }
+  path: "booking/:eventId",
+  element: <BookingPage />,
+},
+
+{
+  path: "/receipt/:bookingId",
+  element: <ReceiptPage />,
+}
       ]
     }
   ])

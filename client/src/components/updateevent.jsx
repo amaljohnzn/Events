@@ -1,108 +1,99 @@
 import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Form, Button, Spinner, Alert } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const EventUpdate = () => {
-  const { eventId } = useParams(); // Get the event ID from the URL
+  const { eventId } = useParams();
   const navigate = useNavigate();
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-  // State to manage form data and loading
   const [eventData, setEventData] = useState({
     title: '',
     description: '',
     date: '',
     time: '',
     venue: '',
-    image: null
+    image: '', // now only URL
+    ticketPrice: '',
+    totalSlots: ''
   });
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  // Fetch event data when the component mounts
+  // Predefined times for selection
+  const timeOptions = [
+    '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
+    '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM',
+    '05:00 PM', '06:00 PM', '07:00 PM', '08:00 PM'
+  ];
+
+  // Fetch event details
   useEffect(() => {
-    setLoading(true);
-    console.log("Event ID from URL:", eventId);
-  
-    axios.get(`http://localhost:4000/api/events/eventdetails/${eventId}`)
-      .then(response => {
-        if (response.data && response.data.eventDetails) {
-          console.log("Fetched Event Data:", response.data.eventDetails);
-          const eventData = response.data.eventDetails;
-  
-          // Format the date to yyyy-MM-dd
-          const formattedDate = new Date(eventData.date).toISOString().split('T')[0];
-  
+    const fetchEvent = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/api/events/eventdetails/${eventId}`);
+        const data = res.data?.eventDetails;
+
+        if (data) {
           setEventData({
-            title: eventData.title || '',
-            description: eventData.description || '',
-            date: formattedDate || '',
-            time: eventData.time || '',
-            venue: eventData.venue || '',
-            image: eventData.image || null
+            title: data.title || '',
+            description: data.description || '',
+            date: data.date ? new Date(data.date).toISOString().split('T')[0] : '',
+            time: data.time || '',
+            venue: data.venue || '',
+            image: data.image || '',
+            ticketPrice: data.ticketPrice || '',
+            totalSlots: data.totalSlots || ''
           });
         } else {
-          setError('Event data is missing or malformed');
+          setError('Event details not found.');
         }
+      } catch (err) {
+        console.error(err);
+        setError(err.response?.data?.message || 'Failed to fetch event details.');
+      } finally {
         setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching event:", err);
-        setLoading(false);
-        setError('Failed to fetch event details');
-      });
-  }, [eventId]);
-  
-  
+      }
+    };
+
+    fetchEvent();
+  }, [eventId, API_BASE_URL]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEventData({
-      ...eventData,
-      [name]: value
-    });
+    setEventData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    setEventData({
-      ...eventData,
-      image: e.target.files[0]
-    });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
+    setSuccess(false);
 
-    const formData = new FormData();
-    formData.append('title', eventData.title);
-    formData.append('description', eventData.description);
-    formData.append('date', eventData.date);
-    formData.append('time', eventData.time);
-    formData.append('venue', eventData.venue);
-    if (eventData.image) {
-      formData.append('image', eventData.image);
-    }
-
-    axios.put(`http://localhost:4000/api/events/update/${eventId}`, formData)
-      .then(response => {
-        setSuccess(true);
-        setError('');
-        setLoading(false);
-        setTimeout(() => navigate('/events'), 2000); // Navigate to the events page after a successful update
-      })
-      .catch(err => {
-        setError('Failed to update event');
-        setSuccess(false);
-        setLoading(false);
+    try {
+      // Only JSON now
+      await axios.put(`${API_BASE_URL}/api/events/update/${eventId}`, eventData, {
+        headers: { 'Content-Type': 'application/json' }
       });
+
+      setSuccess(true);
+      setLoading(false);
+
+      setTimeout(() => navigate('/eventlist'), 2000);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Failed to update event.');
+      setLoading(false);
+    }
   };
 
   if (loading) {
     return (
-      <Container className="mt-5">
-        <Spinner animation="border" role="status" variant="primary" />
+      <Container className="mt-5 text-center">
+        <Spinner animation="border" variant="primary" />
         <span className="ms-2">Loading event...</span>
       </Container>
     );
@@ -110,88 +101,63 @@ const EventUpdate = () => {
 
   return (
     <Container className="mt-4">
-      <h1 className="text-center">Update Event</h1>
+      <h1 className="text-center mb-4">Update Event</h1>
 
       {error && <Alert variant="danger">{error}</Alert>}
       {success && <Alert variant="success">Event updated successfully!</Alert>}
 
       <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3" controlId="title">
+        <Form.Group className="mb-3">
           <Form.Label>Event Title</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter event title"
-            name="title"
-            value={eventData.title}
-            onChange={handleChange}
-            required
-          />
+          <Form.Control type="text" name="title" value={eventData.title} onChange={handleChange} required />
         </Form.Group>
 
-        <Form.Group className="mb-3" controlId="description">
+        <Form.Group className="mb-3">
           <Form.Label>Description</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            placeholder="Enter event description"
-            name="description"
-            value={eventData.description}
-            onChange={handleChange}
-            required
-          />
+          <Form.Control as="textarea" rows={3} name="description" value={eventData.description} onChange={handleChange} required />
         </Form.Group>
 
-        <Form.Group className="mb-3" controlId="date">
+        <Form.Group className="mb-3">
           <Form.Label>Date</Form.Label>
-          <Form.Control
-            type="date"
-            name="date"
-            value={eventData.date}
-            onChange={handleChange}
-            required
-          />
+          <Form.Control type="date" name="date" value={eventData.date} onChange={handleChange} required />
         </Form.Group>
 
-        <Form.Group className="mb-3" controlId="time">
+        <Form.Group className="mb-3">
           <Form.Label>Time</Form.Label>
-          <Form.Control
-            type="time"
-            name="time"
-            value={eventData.time}
-            onChange={handleChange}
-            required
-          />
+          <Form.Select name="time" value={eventData.time} onChange={handleChange} required>
+            <option value="">Select time</option>
+            {timeOptions.map(t => <option key={t} value={t}>{t}</option>)}
+          </Form.Select>
         </Form.Group>
 
-        <Form.Group className="mb-3" controlId="venue">
+        <Form.Group className="mb-3">
           <Form.Label>Venue</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter event venue"
-            name="venue"
-            value={eventData.venue}
-            onChange={handleChange}
-            required
-          />
+          <Form.Control type="text" name="venue" value={eventData.venue} onChange={handleChange} required />
         </Form.Group>
 
-        <Form.Group className="mb-3" controlId="image">
-          <Form.Label>Event Image</Form.Label>
-          <Form.Control
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-          />
+        <Form.Group className="mb-3">
+          <Form.Label>Ticket Price</Form.Label>
+          <Form.Control type="number" name="ticketPrice" value={eventData.ticketPrice} onChange={handleChange} required />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Total Slots</Form.Label>
+          <Form.Control type="number" name="totalSlots" value={eventData.totalSlots} onChange={handleChange} required />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Event Image URL</Form.Label>
+          <Form.Control type="text" name="image" value={eventData.image} onChange={handleChange} required />
           {eventData.image && (
             <img
-              src={typeof eventData.image === 'string' ? eventData.image : URL.createObjectURL(eventData.image)}
+              src={eventData.image}
               alt="Event"
-              style={{ width: '100px', height: '60px', objectFit: 'cover', marginTop: '10px' }}
+              style={{ width: '120px', height: '70px', objectFit: 'cover', marginTop: '10px' }}
             />
           )}
         </Form.Group>
 
-        <Button variant="primary" type="submit" disabled={loading}>
+        <Button variant="primary" type="submit" className="w-100" disabled={loading}>
           {loading ? 'Updating...' : 'Update Event'}
         </Button>
       </Form>

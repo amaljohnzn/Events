@@ -1,62 +1,83 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-// import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-
-
-import { axiosInstance } from '../axios/axiosInstance';
-import { Container, Row, Col, Card, Button } from "react-bootstrap"
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Container, Row, Col, Card, Button, Spinner, Alert } from "react-bootstrap";
 
 const Events = () => {
-  const [events, setEvents] = useState([])
-
-  useEffect(() => {
-    // axiosInstance.get("/events/eventlist")
-    axios.get('http://localhost:4000/api/events/eventlist')
-      .then((res) => {
-        console.log("API Response:", res.data);
-        setEvents(res.data.eventList); // Access the eventList array
-      })
-      .catch((err) => console.error(err));
-  }, []);
-
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  return (
-    <div>
-      <Container className="mt-4">
-        <h1 className="mt-4 text-center border border-black rounded-pill bg-black text-white"  >Events list</h1>
-        <Row>
-          {Array.isArray(events) ? (
-            events.map((event) => (
-               <Col md={6} lg={4} sm={12} key={event._id}>
-                {/* //  <Col md={6} lg={4} sm={12} key={eventId }> */}
-                <Card style={{ width: '18rem' }}>
-                  <Card.Img variant="top" src={event.image} alt={event.title} />
-                  <Card.Body>
-                    <Card.Title>{event.title}</Card.Title>
-                    <Card.Text>{event.description}</Card.Text>
-                    {/* <Button as={Link} to={`/event/${event.id}`} variant="primary">
-                      Event Details
-                    </Button> */}
-                    <Button onClick={() => navigate(`/api/events/eventdetails/${event._id }`)} variant="primary">
-                      Event Details
-                    </Button>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))
-          ) : (
-            <p>No events available.</p>
-          )}
+  const API_BASE = import.meta.env.VITE_API_BASE_URL; // from .env
 
-        </Row>
+  useEffect(() => {
+    axios
+      .get(`${API_BASE}/api/events/eventlist`)
+      .then((res) => {
+        setEvents(res.data.eventList || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError("Failed to fetch events");
+        setLoading(false);
+      });
+  }, [API_BASE]);
 
-
+  if (loading) {
+    return (
+      <Container className="mt-5 text-center">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-2">Loading events...</p>
       </Container>
-    </div>
-  )
-}
+    );
+  }
 
+  if (error) {
+    return (
+      <Container className="mt-5">
+        <Alert variant="danger">{error}</Alert>
+      </Container>
+    );
+  }
 
-export default Events
+  return (
+    <Container className="mt-4">
+      <h2 className="text-center mb-4 border border-dark rounded-pill bg-dark text-white py-2">
+        Events List
+      </h2>
+      <Row className="g-4">
+        {events.length > 0 ? (
+          events.map((event) => (
+            <Col md={6} lg={4} sm={12} key={event._id}>
+              <Card className="shadow-sm h-100">
+                <Card.Img
+                  variant="top"
+                  src={event.image}
+                  alt={event.title}
+                  style={{ height: "180px", objectFit: "cover" }}
+                />
+                <Card.Body>
+                  <Card.Title>{event.title}</Card.Title>
+                  <Card.Text className="text-truncate" style={{ maxHeight: "60px" }}>
+                    {event.description}
+                  </Card.Text>
+                  <Button
+                    variant="primary"
+                    onClick={() => navigate(`/api/events/eventdetails/${event._id}`)}
+                  >
+                    View Details
+                  </Button>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))
+        ) : (
+          <p className="text-center">No events available.</p>
+        )}
+      </Row>
+    </Container>
+  );
+};
+
+export default Events;
