@@ -7,7 +7,7 @@ function Homepage() {
     
        
        <img 
-  src="https://static.vecteezy.com/system/resources/thumbnails/046/732/733/small/vibrant-colors-blend-together-and-swirl-into-a-mystical-haze-as-the-ceremony-progresses-photo.jpg" 
+  src="https://res.cloudinary.com/dandjcp0x/image/upload/v1758257984/rachel-coyne-U7HLzMO4SIY-unsplash_ouiojo.jpg" 
   alt="Description of image" 
   style={{ width: "90%", height: "auto", maxWidth: "1500px", display: "block", margin: "0 auto" }}
 />

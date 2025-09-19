@@ -14,6 +14,7 @@ const create = async (req, res) => {
 
 
 
+
 const getAll = async (req, res) => {
     try {
         const tickets = await ticketDb.find();
