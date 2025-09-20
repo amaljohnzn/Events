@@ -16,9 +16,20 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ✅ Allow multiple origins dynamically
+const allowedOrigins = [
+  "https://events-pearl.vercel.app",
+  "http://localhost:3000"
+];
+
 app.use(cors({
-    origin: "*",
-    credentials: true,
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true, // important for cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
