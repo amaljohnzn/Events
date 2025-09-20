@@ -17,19 +17,26 @@ app.use(cookieParser());
 
 // ✅ Allow multiple origins dynamically
 
-const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:4007"];
+const allowedOrigins = [
+  process.env.FRONTEND_URL, 
+  'https://events-pearl.vercel.app',
+  'http://localhost:3000'
+];
+
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            callback(new Error("Not allowed by CORS"));
+            console.log('Blocked by CORS:', origin);
+            callback(new Error('Not allowed by CORS'));
         }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
 
 app.get('/', (req, res) => {
     res.send("Welcome to my pages");
