@@ -15,12 +15,12 @@ import EventList from "./components/manageevents";
 import EventUpdate from "./components/updateevent";
 import Payment from "./user/Payment";
 import UsersList from "./components/userslist";
-
 import MyBookings from "./user/MyBookings";
 import BookingPage from "./user/Bookings"
-
+import Ticket from "./components/TicketLists"
 import ReceiptPage from "./user/Recipet";
-import Ticket from "./components/TicketList"
+
+
 function App() {
   const router = createBrowserRouter([
     {
@@ -45,8 +45,6 @@ function App() {
           element: <EventDetails />
         },
         
-       
-
 
 
         {
