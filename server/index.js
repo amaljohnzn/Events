@@ -15,23 +15,18 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 
-
-const allowedOrigins = [
-  process.env.FRONTEND_URL, // https://events-pearl.vercel.app
-  "http://localhost:3000"
-];
-
 app.use(cors({
-  origin: function(origin, callback) {
-    console.log("CORS request from:", origin);
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
+  origin: process.env.FRONTEND_URL, // Allow only your frontend
+  credentials: true, // Allow cookies (important for JWT)
+  methods: ["GET", "POST", "PATCH", "DELETE", "PUT"], // Allowed HTTP methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
 }));
+
+// ✅ Handle preflight requests properly
+app.options("*", cors());
+
+
+
 
 
 // Routes
