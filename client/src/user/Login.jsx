@@ -12,11 +12,13 @@ function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const userLogin = async () => {
     const formData = { email, password };
 
-    // Single login endpoint
-    const loginUrl = 'http://localhost:4007/api/user/login'; // Update with your env variable if needed
+    // ✅ Use env variable
+    const loginUrl = `${API_BASE_URL}/api/user/login`;
 
     try {
       const response = await axios.post(loginUrl, formData, {
@@ -40,7 +42,7 @@ function Login() {
 
       // Navigate based on role
       if (user.role === 'admin') navigate('/admin-dashboard');
-      else navigate('/user-dashboard');
+      else navigate('/');
 
     } catch (err) {
       console.error('Login error:', err.response?.data || err.message);

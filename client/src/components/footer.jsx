@@ -6,15 +6,20 @@ function Footer() {
     <footer style={footerStyle}>
       <Container>
         <Row>
-          <Col md={6}>
-            <h5>MyApp</h5>
-            <p>&copy; 2025 MyApp. All rights reserved.</p>
+          <Col xs={6}>
+            <small>© 2025 MyApp</small>
           </Col>
-          <Col md={6} className="text-md-end">
-            <ul className="list-unstyled mb-0">
-              <li><a href="#home" className="text-dark">Home</a></li>
-              <li><a href="#about" className="text-dark">About</a></li>
-              <li><a href="#contact" className="text-dark">Contact</a></li>
+          <Col xs={6} className="text-end">
+            <ul className="list-inline mb-0">
+              <li className="list-inline-item">
+                <a href="#home" className="text-dark small">Home</a>
+              </li>
+              <li className="list-inline-item">
+                <a href="#about" className="text-dark small">About</a>
+              </li>
+              <li className="list-inline-item">
+                <a href="#contact" className="text-dark small">Contact</a>
+              </li>
             </ul>
           </Col>
         </Row>
@@ -24,11 +29,16 @@ function Footer() {
 }
 
 const footerStyle = {
-  backgroundColor: '#f8f9fa', // light grey
-  color: '#212529',            // dark text
-  padding: '20px 0',
+  backgroundColor: '#f8f9fa',
+  color: '#212529',
+  padding: '8px 0',          // smaller height
   borderTop: '1px solid #dee2e6',
-  textAlign: 'left',
+  fontSize: '0.85rem',       // smaller text
+  position: 'fixed',
+  bottom: 0,
+  left: 0,
+  width: '100%',
+  zIndex: 1000,
 };
 
 export default Footer;

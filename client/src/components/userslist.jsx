@@ -7,11 +7,14 @@ const UsersList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Get API base URL from environment
+    const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
     // Fetch all users from the API
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:4007/api/user/userslist'); 
+                const response = await axios.get(`${API_BASE}/api/user/userslist`);
                 setUsers(response.data.data);
                 setLoading(false);
             } catch (err) {
@@ -20,13 +23,13 @@ const UsersList = () => {
             }
         };
         fetchUsers();
-    }, []);
+    }, [API_BASE]);
 
     if (loading) {
         return (
-            <Container className="mt-5">
+            <Container className="mt-5 text-center">
                 <Spinner animation="border" variant="primary" />
-                <span className="ml-3">Loading...</span>
+                <span className="ms-3">Loading...</span>
             </Container>
         );
     }

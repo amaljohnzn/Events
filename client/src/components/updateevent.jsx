@@ -9,7 +9,7 @@ const EventUpdate = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const [eventData, setEventData] = useState({
-    title: '',
+    name: '',
     description: '',
     date: '',
     time: '',
@@ -39,7 +39,7 @@ const EventUpdate = () => {
 
         if (data) {
           setEventData({
-            title: data.title || '',
+            title: data.name || '',
             description: data.description || '',
             date: data.date ? new Date(data.date).toISOString().split('T')[0] : '',
             time: data.time || '',
@@ -109,7 +109,7 @@ const EventUpdate = () => {
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
           <Form.Label>Event Title</Form.Label>
-          <Form.Control type="text" name="title" value={eventData.title} onChange={handleChange} required />
+          <Form.Control type="text" name="title" value={eventData.name} onChange={handleChange} required />
         </Form.Group>
 
         <Form.Group className="mb-3">
